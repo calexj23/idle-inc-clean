@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 
-type StartupEvent = {
-  text: string;
-  options: {
-    label: string;
-    effect: (revenue: number, clickPower: number) => number | { r?: number; cp?: number };
-  }[];
-};
+const defaultSlogans = [
+  "Disrupting mediocrity with chaotic brilliance.",
+  "Where AI meets WTF.",
+  "Powering the future with jokes and code.",
+  "The smartest bad idea you'll ever fund.",
+  "Serving nonsense. At scale.",
+];
 
 const productIdeas = [
   "AI for houseplants 🌿",
@@ -24,54 +24,39 @@ const upgradeFlavors = [
   "Replace dev team with ChatGPT 🤖",
 ];
 
-const slogans = [
-  "Disrupting mediocrity with chaotic brilliance.",
-  "Where AI meets WTF.",
-  "Powering the future with jokes and code.",
-  "The smartest bad idea you'll ever fund.",
-  "Serving nonsense. At scale.",
-];
-
-const eventPrompts: StartupEvent[] = [
-  {
-    text: "Your AI toaster went viral on TikTok. Do you sell it to a VC?",
-    options: [
-      { label: "Sell and cash out (+$100)", effect: (r) => r + 100 },
-      { label: "Stay indie (double click power)", effect: (r, cp) => ({ cp: cp * 2 }) },
-    ],
-  },
-  {
-    text: "A user trained your app to say bad words. Do damage control?",
-    options: [
-      { label: "Hire PR firm (-$50)", effect: (r) => r - 50 },
-      { label: "Ignore and rebrand (reset revenue)", effect: () => ({ r: 0 }) },
-    ],
-  },
-];
-
 export default function Home() {
   const [revenue, setRevenue] = useState<number>(0);
-  const [product, setProduct] = useState<string>(productIdeas[0]);
   const [clickPower, setClickPower] = useState<number>(1);
   const [level, setLevel] = useState<number>(1);
-  const [event, setEvent] = useState<StartupEvent | null>(null);
-  const [floatingCash, setFloatingCash] = useState<number[]>([]);
-  const [passivePower, setPassivePower] = useState<number>(0);
-  const [upgradeMsg, setUpgradeMsg] = useState<string>("");
+  const [product, setProduct] = useState<string>(productIdeas[0]);
   const [slogan, setSlogan] = useState<string>("");
+  const [theme, setTheme] = useState<string>("default");
+  const [startupsFounded, setStartupsFounded] = useState<number>(1);
+  const [bestSlogan, setBestSlogan] = useState<string>("");
+
+  const [themeUnlocked, setThemeUnlocked] = useState<boolean>(false);
+  const [openaiKey, setOpenaiKey] = useState<string>("");
+
+  const generateSlogan = async () => {
+    try {
+      const response = await fetch("/api/slogan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idea: product }),
+      });
+      const data = await response.json();
+      const aiSlogan = data.slogan;
+      setSlogan(aiSlogan);
+      if (aiSlogan.length > bestSlogan.length) setBestSlogan(aiSlogan);
+    } catch (err) {
+      console.error("Proxy error:", err);
+      setSlogan("AI is on vacation 😅");
+    }
+  };
+  
 
   const handleWork = () => {
-    setRevenue((prev) => prev + clickPower);
-    const id = Date.now();
-    setFloatingCash((prev) => [...prev, id]);
-    setTimeout(() => {
-      setFloatingCash((prev) => prev.filter((cashId) => cashId !== id));
-    }, 800);
-
-    if (Math.random() < 0.05) {
-      const e = eventPrompts[Math.floor(Math.random() * eventPrompts.length)];
-      setEvent(e);
-    }
+    setRevenue(prev => prev + clickPower);
   };
 
   const handleUpgrade = () => {
@@ -80,134 +65,68 @@ export default function Home() {
       setRevenue(revenue - cost);
       setClickPower(clickPower + 1);
       setLevel(level + 1);
-      const flavor = upgradeFlavors[Math.floor(Math.random() * upgradeFlavors.length)];
-      setUpgradeMsg(flavor);
-      setTimeout(() => setUpgradeMsg(""), 2000);
+      if (revenue >= 500 && !themeUnlocked) {
+        setTheme("gold");
+        setThemeUnlocked(true);
+      }
     }
   };
 
-  const handleNewIdea = () => {
-    const next = productIdeas[Math.floor(Math.random() * productIdeas.length)];
-    setProduct(next);
+  const startNewStartup = () => {
     setRevenue(0);
     setClickPower(1);
     setLevel(1);
-    setPassivePower(0);
+    setStartupsFounded((prev) => prev + 1);
+    const nextIdea = productIdeas[Math.floor(Math.random() * productIdeas.length)];
+    setProduct(nextIdea);
     setSlogan("");
   };
 
-  const handleEventChoice = (option: StartupEvent["options"][number]) => {
-    const result = option.effect(revenue, clickPower);
-    if (typeof result === "object") {
-      if (result.r !== undefined) setRevenue(result.r);
-      if (result.cp !== undefined) setClickPower(result.cp);
-    } else {
-      setRevenue(result);
-    }
-    setEvent(null);
+  const styleMap: Record<string, React.CSSProperties> = {
+    default: { backgroundColor: "#1DA1F2", color: "#fff" },
+    gold: { backgroundColor: "gold", color: "#000" },
   };
-
-  const handleGenerateSlogan = () => {
-    const s = slogans[Math.floor(Math.random() * slogans.length)];
-    setSlogan(s);
-  };
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setRevenue((rev) => rev + passivePower);
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [passivePower]);
-
-  const shareText = encodeURIComponent(
-    `🚀 I built a startup in Idle Inc: "${product}" and earned $${revenue}! Slogan: "${slogan}" Play here 👉`
-  );
-  const shareUrl = `https://twitter.com/intent/tweet?text=${shareText}&url=https://your-vercel-site.vercel.app`;
 
   return (
-    <main style={{ fontFamily: "sans-serif", padding: "2rem", maxWidth: 600, margin: "auto", position: "relative" }}>
+    <main style={{ fontFamily: "sans-serif", padding: "2rem", maxWidth: 600, margin: "auto" }}>
       <h1>🦄 Idle Inc: Startup Tycoon</h1>
-      <p>Build your weird AI startup and earn 💰 while having fun.</p>
 
-      <h2>💡 Your Startup:</h2>
-      <p style={{ fontSize: "1.2rem", fontWeight: "bold" }}>{product}</p>
-      {slogan && <p style={{ fontStyle: "italic", marginBottom: "1rem" }}>🏷️ {slogan}</p>}
-      <button onClick={handleGenerateSlogan} style={btnStyle}>✨ Generate Slogan</button>
+      <h2>Your Startup: {product}</h2>
+      <p><strong>Slogan:</strong> {slogan || "No slogan yet"}</p>
 
-      <h3>📈 Revenue: ${revenue}</h3>
-      <p>💪 Click Power: {clickPower} | 📊 Level: {level} | 💸 Passive: ${passivePower}/sec</p>
+      <input
+        type="password"
+        style={{ marginBottom: "1rem", width: "100%", padding: "0.5rem" }}
+      />
 
-      <button onClick={handleWork} style={btnStyle}>
-        Work 💼 (+${clickPower})
-      </button>{" "}
-      <button onClick={handleUpgrade} style={btnStyle}>
-        Upgrade 🧪 (-${50 * level})
-      </button>{" "}
-      <button onClick={() => setPassivePower(passivePower + 1)} style={btnStyle}>
-        Invest in AutoBot 🤖
-      </button>{" "}
-      <button onClick={handleNewIdea} style={btnStyle}>
-        Start New Startup 🔁
-      </button>
+      <div style={{ marginBottom: "1rem" }}>
+        <button onClick={handleWork} style={{ padding: "0.5rem 1rem" }}>💼 Work (+${clickPower})</button>
+        <button onClick={handleUpgrade} style={{ padding: "0.5rem 1rem", marginLeft: "0.5rem" }}>
+          🧪 Upgrade (-${50 * level})
+        </button>
+        <button onClick={generateSlogan} style={{ padding: "0.5rem 1rem", marginLeft: "0.5rem" }}>✨ AI Slogan</button>
+        <button onClick={startNewStartup} style={{ padding: "0.5rem 1rem", marginLeft: "0.5rem" }}>🔁 Restart</button>
+      </div>
 
-      {upgradeMsg && <p style={{ marginTop: "1rem", fontStyle: "italic" }}>📈 {upgradeMsg}</p>}
-
-      {event && (
-        <div style={eventBoxStyle}>
-          <h3>⚠️ Startup Event!</h3>
-          <p>{event.text}</p>
-          {event.options.map((opt, idx) => (
-            <button key={idx} onClick={() => handleEventChoice(opt)} style={btnStyle}>
-              {opt.label}
-            </button>
-          ))}
-        </div>
-      )}
-
-      {floatingCash.map((id) => (
-        <div key={id} style={floatingStyle}>+${clickPower}</div>
-      ))}
+      <h3>📊 Your Founder Stats</h3>
+      <ul>
+        <li>Total Revenue: ${revenue}</li>
+        <li>Click Power: {clickPower}</li>
+        <li>Startups Founded: {startupsFounded}</li>
+        <li>Best Slogan: "{bestSlogan || "N/A"}"</li>
+        <li>Current Theme: {themeUnlocked ? theme : "Locked"}</li>
+      </ul>
 
       <div style={{ marginTop: "2rem" }}>
-        <a href={shareUrl} target="_blank" rel="noopener noreferrer" style={shareStyle}>
+        <a
+          href={`https://twitter.com/intent/tweet?text=I built a startup called ${product} and earned $${revenue}! Slogan: ${slogan}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={styleMap[theme]}
+        >
           🔗 Share on Twitter
         </a>
       </div>
     </main>
   );
 }
-
-const btnStyle = {
-  padding: "0.6rem 1rem",
-  margin: "0.5rem 0.3rem",
-  fontSize: "16px",
-  cursor: "pointer",
-};
-
-const shareStyle = {
-  background: "#1DA1F2",
-  color: "#fff",
-  padding: "0.6rem 1rem",
-  textDecoration: "none",
-  borderRadius: "6px",
-};
-
-const floatingStyle: React.CSSProperties = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  animation: "fadeUp 0.8s ease-out forwards",
-  background: "rgba(255,255,255,0.8)",
-  padding: "0.4rem 0.8rem",
-  borderRadius: "6px",
-  pointerEvents: "none" as const,
-};
-
-const eventBoxStyle = {
-  background: "#fff3cd",
-  border: "1px solid #ffeeba",
-  padding: "1rem",
-  marginTop: "2rem",
-  borderRadius: "8px",
-};
