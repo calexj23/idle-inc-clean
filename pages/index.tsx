@@ -192,7 +192,7 @@ const shareStyle = {
   borderRadius: "6px",
 };
 
-const floatingStyle = {
+const floatingStyle: React.CSSProperties = {
   position: "absolute",
   top: "50%",
   left: "50%",
@@ -201,7 +201,7 @@ const floatingStyle = {
   background: "rgba(255,255,255,0.8)",
   padding: "0.4rem 0.8rem",
   borderRadius: "6px",
-  pointerEvents: "none",
+  pointerEvents: "none" as const,
 };
 
 const eventBoxStyle = {
