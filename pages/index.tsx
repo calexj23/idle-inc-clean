@@ -33,9 +33,7 @@ export default function Home() {
   const [theme, setTheme] = useState<string>("default");
   const [startupsFounded, setStartupsFounded] = useState<number>(1);
   const [bestSlogan, setBestSlogan] = useState<string>("");
-
   const [themeUnlocked, setThemeUnlocked] = useState<boolean>(false);
-  const [openaiKey, setOpenaiKey] = useState<string>("");
 
   const generateSlogan = async () => {
     try {
@@ -53,7 +51,6 @@ export default function Home() {
       setSlogan("AI is on vacation 😅");
     }
   };
-  
 
   const handleWork = () => {
     setRevenue(prev => prev + clickPower);
@@ -93,11 +90,6 @@ export default function Home() {
 
       <h2>Your Startup: {product}</h2>
       <p><strong>Slogan:</strong> {slogan || "No slogan yet"}</p>
-
-      <input
-        type="password"
-        style={{ marginBottom: "1rem", width: "100%", padding: "0.5rem" }}
-      />
 
       <div style={{ marginBottom: "1rem" }}>
         <button onClick={handleWork} style={{ padding: "0.5rem 1rem" }}>💼 Work (+${clickPower})</button>
