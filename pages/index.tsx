@@ -23,11 +23,11 @@ export default function Home() {
   const [eventPopup, setEventPopup] = useState<string | null>(null);
   const [unlockedTeam, setUnlockedTeam] = useState<string[]>([]);
   const [events, setEvents] = useState([
-    { message: "Your pitch went viral!", delta: 100 },
-    { message: "Server costs spiked!", delta: -40 },
-    { message: "Angel investor bonus!", delta: 200 },
-    { message: "Bug in production 😅", delta: -60 },
-    { message: "Product Hunt shoutout!", delta: 150 },
+    { message: "🛠️ Infrastructure upgrade! +$80", delta: 80 },
+    { message: "📈 You closed a Series A round! +$500", delta: 500 },
+    { message: "🎯 Viral blog post by your intern! +$120", delta: 120 },
+    { message: "📉 Legal fees set you back. -$100", delta: -100 },
+    { message: "🧪 Testing chaos — rollback deployed. -$50", delta: -50 },
   ]);
 
   const teamUnlocks = [
@@ -37,13 +37,17 @@ export default function Home() {
   ];
 
   useEffect(() => {
-    const eligible = teamUnlocks.filter(t => revenue >= t.at && !unlockedTeam.includes(t.name));
+    const eligible = teamUnlocks.filter(
+      (t) => revenue >= t.at && !unlockedTeam.includes(t.name)
+    );
     if (eligible.length > 0) {
-      setUnlockedTeam(prev => [...prev, ...eligible.map(e => e.name)]);
+      setUnlockedTeam((prev) => [...prev, ...eligible.map((e) => e.name)]);
     }
   }, [revenue]);
 
-  const nextMilestone = teamUnlocks.find(t => !unlockedTeam.includes(t.name));
+  const nextMilestone = teamUnlocks.find(
+    (t) => !unlockedTeam.includes(t.name)
+  );
 
   const generateSlogan = async () => {
     try {
@@ -64,14 +68,14 @@ export default function Home() {
 
   const triggerRandomEvent = () => {
     const event = events[Math.floor(Math.random() * events.length)];
-    setEventPopup(`${event.message} ${event.delta > 0 ? "+$" : "-$"}${Math.abs(event.delta)}`);
-    setRevenue(prev => Math.max(prev + event.delta, 0));
+    setEventPopup(event.message);
+    setRevenue((prev) => Math.max(prev + event.delta, 0));
     setTimeout(() => setEventPopup(null), 3000);
   };
 
   const handleWork = () => {
-    setRevenue(prev => prev + clickPower);
-    setClickCount(prev => {
+    setRevenue((prev) => prev + clickPower);
+    setClickCount((prev) => {
       const newCount = prev + 1;
       if (newCount % 10 === 0) triggerRandomEvent();
       return newCount;
@@ -95,10 +99,11 @@ export default function Home() {
     setRevenue(0);
     setClickPower(1);
     setLevel(1);
-    setStartupsFounded(prev => prev + 1);
+    setStartupsFounded((prev) => prev + 1);
     setClickCount(0);
     setUnlockedTeam([]);
-    const nextIdea = productIdeas[Math.floor(Math.random() * productIdeas.length)];
+    const nextIdea =
+      productIdeas[Math.floor(Math.random() * productIdeas.length)];
     setProduct(nextIdea);
     setSlogan("");
   };
@@ -109,7 +114,15 @@ export default function Home() {
   };
 
   return (
-    <main style={{ fontFamily: "sans-serif", padding: "2rem", maxWidth: 600, margin: "auto", position: "relative" }}>
+    <main
+      style={{
+        fontFamily: "sans-serif",
+        padding: "2rem",
+        maxWidth: 600,
+        margin: "auto",
+        position: "relative",
+      }}
+    >
       <h1>🦄 Idle Inc: Startup Tycoon</h1>
 
       <input
@@ -122,36 +135,61 @@ export default function Home() {
       />
 
       <h2>Your Startup: {startupName}</h2>
-      <p><strong>Idea:</strong> {product}</p>
-      <p><strong>Slogan:</strong> {slogan || "No slogan yet"}</p>
+      <p>
+        <strong>Idea:</strong> {product}
+      </p>
+      <p>
+        <strong>Slogan:</strong> {slogan || "No slogan yet"}
+      </p>
 
       <div style={{ marginBottom: "1rem" }}>
-        <button onClick={handleWork} style={{ padding: "0.5rem 1rem" }}>💼 Work (+${clickPower})</button>
-        <button onClick={handleUpgrade} style={{ padding: "0.5rem 1rem", marginLeft: "0.5rem" }}>
+        <button onClick={handleWork} style={{ padding: "0.5rem 1rem" }}>
+          💼 Work (+${clickPower})
+        </button>
+        <button
+          onClick={handleUpgrade}
+          style={{ padding: "0.5rem 1rem", marginLeft: "0.5rem" }}
+        >
           🧪 Upgrade (-${50 * level})
         </button>
-        <button onClick={generateSlogan} style={{ padding: "0.5rem 1rem", marginLeft: "0.5rem" }}>✨ AI Slogan</button>
-        <button onClick={startNewStartup} style={{ padding: "0.5rem 1rem", marginLeft: "0.5rem" }}>🔁 Restart</button>
+        <button
+          onClick={generateSlogan}
+          style={{ padding: "0.5rem 1rem", marginLeft: "0.5rem" }}
+        >
+          ✨ AI Slogan
+        </button>
+        <button
+          onClick={startNewStartup}
+          style={{ padding: "0.5rem 1rem", marginLeft: "0.5rem" }}
+        >
+          🔁 Restart
+        </button>
       </div>
 
       {eventPopup && (
-        <div style={{
-          position: "absolute",
-          top: "10px",
-          left: "50%",
-          transform: "translateX(-50%)",
-          background: "#222",
-          color: "#fff",
-          padding: "0.75rem 1.5rem",
-          borderRadius: "8px",
-          boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
-          fontWeight: "bold",
-          zIndex: 10,
-        }}>{eventPopup}</div>
+        <div
+          style={{
+            position: "absolute",
+            top: "10px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            background: "#222",
+            color: "#fff",
+            padding: "0.75rem 1.5rem",
+            borderRadius: "8px",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
+            fontWeight: "bold",
+            zIndex: 10,
+          }}
+        >
+          {eventPopup}
+        </div>
       )}
 
       {nextMilestone && (
-        <p style={{ fontStyle: "italic", marginTop: "1rem" }}>🎯 Next unlock at ${nextMilestone.at}</p>
+        <p style={{ fontStyle: "italic", marginTop: "1rem" }}>
+          🎯 Next unlock at ${nextMilestone.at}
+        </p>
       )}
 
       <h3>📊 Your Founder Stats</h3>
@@ -159,7 +197,7 @@ export default function Home() {
         <li>Total Revenue: ${revenue}</li>
         <li>Click Power: {clickPower}</li>
         <li>Startups Founded: {startupsFounded}</li>
-        <li>Best Slogan: "{bestSlogan || "N/A"}"</li>
+        <li>Best Slogan: “{bestSlogan || "N/A"}”</li>
         <li>Current Theme: {themeUnlocked ? theme : "Locked"}</li>
         <li>Team Unlocked: {unlockedTeam.join(", ") || "None yet"}</li>
       </ul>
@@ -169,7 +207,12 @@ export default function Home() {
           href={`https://twitter.com/intent/tweet?text=I built ${startupName} and earned $${revenue}! Slogan: ${slogan}`}
           target="_blank"
           rel="noopener noreferrer"
-          style={{ ...styleMap[theme], padding: "0.5rem 1rem", display: "inline-block", borderRadius: 6 }}
+          style={{
+            ...styleMap[theme],
+            padding: "0.5rem 1rem",
+            display: "inline-block",
+            borderRadius: 6,
+          }}
         >
           🔗 Share on Twitter
         </a>
@@ -177,4 +220,3 @@ export default function Home() {
     </main>
   );
 }
-
