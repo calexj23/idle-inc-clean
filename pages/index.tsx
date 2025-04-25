@@ -1,12 +1,4 @@
-import React, { useState } from "react";
-
-const defaultSlogans = [
-  "Disrupting mediocrity with chaotic brilliance.",
-  "Where AI meets WTF.",
-  "Powering the future with jokes and code.",
-  "The smartest bad idea you'll ever fund.",
-  "Serving nonsense. At scale.",
-];
+import React, { useState, useEffect } from "react";
 
 const productIdeas = [
   "AI for houseplants 🌿",
@@ -14,14 +6,6 @@ const productIdeas = [
   "Crypto-based sandwich loyalty program 🥪",
   "Dog translator for Zoom meetings 🐶",
   "GPT-powered meditation yelling app 😤🧘‍♂️",
-];
-
-const events = [
-  { message: "🔥 Your pitch went viral!", delta: 100 },
-  { message: "😬 Server costs spiked!", delta: -40 },
-  { message: "🎉 Angel investor bonus!", delta: 200 },
-  { message: "💸 Paid influencer scandal!", delta: -60 },
-  { message: "🚀 Feature got Product Hunt love!", delta: 150 },
 ];
 
 export default function Home() {
@@ -37,6 +21,29 @@ export default function Home() {
   const [themeUnlocked, setThemeUnlocked] = useState(false);
   const [clickCount, setClickCount] = useState(0);
   const [eventPopup, setEventPopup] = useState<string | null>(null);
+  const [unlockedTeam, setUnlockedTeam] = useState<string[]>([]);
+  const [events, setEvents] = useState([
+    { message: "Your pitch went viral!", delta: 100 },
+    { message: "Server costs spiked!", delta: -40 },
+    { message: "Angel investor bonus!", delta: 200 },
+    { message: "Bug in production 😅", delta: -60 },
+    { message: "Product Hunt shoutout!", delta: 150 },
+  ]);
+
+  const teamUnlocks = [
+    { name: "Dev Intern", at: 200, effect: "+1 click power" },
+    { name: "Marketing Guru", at: 500, effect: "AI slogans get boost" },
+    { name: "CFO", at: 1000, effect: "Idle income every 10s" },
+  ];
+
+  useEffect(() => {
+    const eligible = teamUnlocks.filter(t => revenue >= t.at && !unlockedTeam.includes(t.name));
+    if (eligible.length > 0) {
+      setUnlockedTeam(prev => [...prev, ...eligible.map(e => e.name)]);
+    }
+  }, [revenue]);
+
+  const nextMilestone = teamUnlocks.find(t => !unlockedTeam.includes(t.name));
 
   const generateSlogan = async () => {
     try {
@@ -90,6 +97,7 @@ export default function Home() {
     setLevel(1);
     setStartupsFounded(prev => prev + 1);
     setClickCount(0);
+    setUnlockedTeam([]);
     const nextIdea = productIdeas[Math.floor(Math.random() * productIdeas.length)];
     setProduct(nextIdea);
     setSlogan("");
@@ -97,7 +105,7 @@ export default function Home() {
 
   const styleMap: Record<string, React.CSSProperties> = {
     default: { backgroundColor: "#1DA1F2", color: "#fff" },
-    gold: { backgroundColor: "gold", color: "#000" },
+    gold: { backgroundColor: "#333", color: "#FFD700" },
   };
 
   return (
@@ -108,6 +116,7 @@ export default function Home() {
         type="text"
         placeholder="Enter your startup name"
         value={startupName}
+        autoFocus
         onChange={(e) => setStartupName(e.target.value)}
         style={{ padding: "0.5rem", width: "100%", marginBottom: "1rem" }}
       />
@@ -131,13 +140,18 @@ export default function Home() {
           top: "10px",
           left: "50%",
           transform: "translateX(-50%)",
-          background: "#fff",
-          color: "#333",
+          background: "#222",
+          color: "#fff",
           padding: "0.75rem 1.5rem",
           borderRadius: "8px",
           boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
           fontWeight: "bold",
+          zIndex: 10,
         }}>{eventPopup}</div>
+      )}
+
+      {nextMilestone && (
+        <p style={{ fontStyle: "italic", marginTop: "1rem" }}>🎯 Next unlock at ${nextMilestone.at}</p>
       )}
 
       <h3>📊 Your Founder Stats</h3>
@@ -147,6 +161,7 @@ export default function Home() {
         <li>Startups Founded: {startupsFounded}</li>
         <li>Best Slogan: "{bestSlogan || "N/A"}"</li>
         <li>Current Theme: {themeUnlocked ? theme : "Locked"}</li>
+        <li>Team Unlocked: {unlockedTeam.join(", ") || "None yet"}</li>
       </ul>
 
       <div style={{ marginTop: "2rem" }}>
@@ -154,7 +169,7 @@ export default function Home() {
           href={`https://twitter.com/intent/tweet?text=I built ${startupName} and earned $${revenue}! Slogan: ${slogan}`}
           target="_blank"
           rel="noopener noreferrer"
-          style={styleMap[theme]}
+          style={{ ...styleMap[theme], padding: "0.5rem 1rem", display: "inline-block", borderRadius: 6 }}
         >
           🔗 Share on Twitter
         </a>
@@ -162,3 +177,4 @@ export default function Home() {
     </main>
   );
 }
+
