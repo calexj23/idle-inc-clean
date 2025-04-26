@@ -106,6 +106,7 @@ export default function Home() {
       productIdeas[Math.floor(Math.random() * productIdeas.length)];
     setProduct(nextIdea);
     setSlogan("");
+    // ❗ Don't reset startupName, so user's name stays
   };
 
   const styleMap: Record<string, React.CSSProperties> = {
