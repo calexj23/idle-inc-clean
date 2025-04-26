@@ -1,48 +1,37 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { OpenAI } from "openai";
 
-
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY!,
 });
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== "GET" && req.method !== "POST") {
-    return res.status(405).end();
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ message: "Method not allowed" });
   }
 
+  const { userIdea } = req.body;
+
   try {
-    const chatCompletion = await openai.chat.completions.create({
+    const completion = await openai.chat.completions.create({
       model: "gpt-4",
       messages: [
         {
-          role: "system",
-          content: "You create fun random startup game content. Be playful but JSON structured.",
-        },
-        {
           role: "user",
-          content: `Give me:
-- 5 random creative startup product ideas (short and funny)
-- 5 startup business events (good and bad)
-- 3 team roles with unlock conditions.
-
-Format clearly in JSON:
-{
-"productIdeas": [],
-"events": [{"message": "", "delta": 0}],
-"teamUnlocks": [{"name": "", "at": 0, "effect": ""}]
-}`,
+          content: `Turn this startup idea into a polished event or milestone for a startup simulation game: ${userIdea}`,
         },
       ],
+      max_tokens: 100,
     });
 
-    const text = chatCompletion.choices[0].message?.content?.trim();
-    const data = JSON.parse(text!);
+    const aiMessage = completion.choices[0]?.message?.content || "";
 
-    res.status(200).json(data);
-  } catch (error) {
+    res.status(200).json({ message: aiMessage });
+  } catch (error: any) {
     console.error(error);
-    res.status(500).json({ error: "Failed to generate game content" });
+    res.status(500).json({ message: "Something went wrong" });
   }
 }
-

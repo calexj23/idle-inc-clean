@@ -1,31 +1,37 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { OpenAI } from "openai";
-;
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY!,
 });
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
   if (req.method !== "POST") {
-    return res.status(405).end();
+    return res.status(405).json({ message: "Method not allowed" });
   }
 
-  const { idea } = req.body;
+  const { startupName } = req.body;
 
   try {
-    const chatCompletion = await openai.chat.completions.create({
+    const completion = await openai.chat.completions.create({
       model: "gpt-4",
       messages: [
-        { role: "system", content: "You are a startup brand expert." },
-        { role: "user", content: `Write a short, catchy startup slogan for this idea: ${idea}` },
+        {
+          role: "user",
+          content: `Create a catchy, fun, and professional startup slogan for a company called "${startupName}"`,
+        },
       ],
+      max_tokens: 50,
     });
 
-    const slogan = chatCompletion.choices[0].message?.content?.trim();
-    res.status(200).json({ slogan });
-  } catch (error) {
+    const aiMessage = completion.choices[0]?.message?.content || "";
+
+    res.status(200).json({ slogan: aiMessage });
+  } catch (error: any) {
     console.error(error);
-    res.status(500).json({ error: "Failed to generate slogan" });
+    res.status(500).json({ message: "Something went wrong" });
   }
 }
