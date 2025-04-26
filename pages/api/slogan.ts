@@ -1,9 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { OpenAI } from "openai";
+import openai from "openai";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY!,
-});
+openai.apiKey = process.env.OPENAI_API_KEY!;
 
 export default async function handler(
   req: NextApiRequest,
@@ -16,18 +14,13 @@ export default async function handler(
   const { startupName } = req.body;
 
   try {
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4",
-      messages: [
-        {
-          role: "user",
-          content: `Create a catchy, fun, and professional startup slogan for a company called "${startupName}"`,
-        },
-      ],
+    const completion = await openai.Completion.create({
+      engine: "davinci",
+      prompt: `Create a catchy, fun, and professional startup slogan for a company called "${startupName}"`,
       max_tokens: 50,
     });
 
-    const aiMessage = completion.choices[0]?.message?.content || "";
+    const aiMessage = completion.choices?.[0]?.text?.trim() || "";
 
     res.status(200).json({ slogan: aiMessage });
   } catch (error: any) {
