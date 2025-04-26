@@ -1,40 +1,37 @@
 import React, { useState, useEffect } from "react";
 
-const productIdeas = [
-  "AI for houseplants 🌿",
-  "Smart fridge that roasts your outfit choices 🧥",
-  "Crypto-based sandwich loyalty program 🥪",
-  "Dog translator for Zoom meetings 🐶",
-  "GPT-powered meditation yelling app 😤🧘‍♂️",
-];
-
 export default function Home() {
   const [startupName, setStartupName] = useState("My Startup");
   const [revenue, setRevenue] = useState(0);
   const [clickPower, setClickPower] = useState(1);
   const [level, setLevel] = useState(1);
-  const [product, setProduct] = useState(productIdeas[0]);
+  const [product, setProduct] = useState("");
   const [slogan, setSlogan] = useState("");
   const [theme, setTheme] = useState("default");
   const [startupsFounded, setStartupsFounded] = useState(1);
   const [bestSlogan, setBestSlogan] = useState("");
   const [themeUnlocked, setThemeUnlocked] = useState(false);
-  const [clickCount, setClickCount] = useState(0);
   const [eventPopup, setEventPopup] = useState<string | null>(null);
   const [unlockedTeam, setUnlockedTeam] = useState<string[]>([]);
-  const [events, setEvents] = useState([
-    { message: "🛠️ Infrastructure upgrade! +$80", delta: 80 },
-    { message: "📈 You closed a Series A round! +$500", delta: 500 },
-    { message: "🎯 Viral blog post by your intern! +$120", delta: 120 },
-    { message: "📉 Legal fees set you back. -$100", delta: -100 },
-    { message: "🧪 Testing chaos — rollback deployed. -$50", delta: -50 },
-  ]);
+  const [events, setEvents] = useState<{ message: string; delta: number }[]>([]);
+  const [productIdeas, setProductIdeas] = useState<string[]>([]);
+  const [teamUnlocks, setTeamUnlocks] = useState<{ name: string; at: number; effect: string }[]>([]);
 
-  const teamUnlocks = [
-    { name: "Dev Intern", at: 200, effect: "+1 click power" },
-    { name: "Marketing Guru", at: 500, effect: "AI slogans get boost" },
-    { name: "CFO", at: 1000, effect: "Idle income every 10s" },
-  ];
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const res = await fetch("/api/generate");
+        const data = await res.json();
+        setProductIdeas(data.productIdeas);
+        setProduct(data.productIdeas[0]);
+        setEvents(data.events);
+        setTeamUnlocks(data.teamUnlocks);
+      } catch (err) {
+        console.error("Failed fetching dynamic content", err);
+      }
+    }
+    fetchData();
+  }, []);
 
   useEffect(() => {
     const eligible = teamUnlocks.filter(
@@ -43,7 +40,7 @@ export default function Home() {
     if (eligible.length > 0) {
       setUnlockedTeam((prev) => [...prev, ...eligible.map((e) => e.name)]);
     }
-  }, [revenue]);
+  }, [revenue, unlockedTeam, teamUnlocks]);
 
   const nextMilestone = teamUnlocks.find(
     (t) => !unlockedTeam.includes(t.name)
@@ -75,11 +72,9 @@ export default function Home() {
 
   const handleWork = () => {
     setRevenue((prev) => prev + clickPower);
-    setClickCount((prev) => {
-      const newCount = prev + 1;
-      if (newCount % 10 === 0) triggerRandomEvent();
-      return newCount;
-    });
+    if ((revenue + clickPower) % 100 < clickPower) {
+      triggerRandomEvent();
+    }
   };
 
   const handleUpgrade = () => {
@@ -100,13 +95,10 @@ export default function Home() {
     setClickPower(1);
     setLevel(1);
     setStartupsFounded((prev) => prev + 1);
-    setClickCount(0);
     setUnlockedTeam([]);
-    const nextIdea =
-      productIdeas[Math.floor(Math.random() * productIdeas.length)];
+    const nextIdea = productIdeas[Math.floor(Math.random() * productIdeas.length)];
     setProduct(nextIdea);
     setSlogan("");
-    // ❗ Don't reset startupName, so user's name stays
   };
 
   const styleMap: Record<string, React.CSSProperties> = {
