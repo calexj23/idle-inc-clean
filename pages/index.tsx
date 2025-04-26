@@ -138,11 +138,27 @@ export default function Home() {
       <p>
         <strong>Idea:</strong> {product}
       </p>
-      <p>
-        <strong>Slogan:</strong> {slogan || "No slogan yet"}
-      </p>
 
-      <div style={{ marginBottom: "1rem" }}>
+      <div style={{ marginTop: "1rem" }}>
+        <strong>Slogan:</strong>
+        <input
+          type="text"
+          value={slogan}
+          onChange={(e) => setSlogan(e.target.value)}
+          placeholder="Enter a slogan or use AI"
+          style={{
+            width: "100%",
+            padding: "0.5rem",
+            marginTop: "0.25rem",
+            marginBottom: "0.5rem",
+          }}
+        />
+        <button onClick={generateSlogan} style={{ padding: "0.5rem 1rem" }}>
+          ✨ Generate with AI
+        </button>
+      </div>
+
+      <div style={{ marginBottom: "1rem", marginTop: "1rem" }}>
         <button onClick={handleWork} style={{ padding: "0.5rem 1rem" }}>
           💼 Work (+${clickPower})
         </button>
@@ -151,12 +167,6 @@ export default function Home() {
           style={{ padding: "0.5rem 1rem", marginLeft: "0.5rem" }}
         >
           🧪 Upgrade (-${50 * level})
-        </button>
-        <button
-          onClick={generateSlogan}
-          style={{ padding: "0.5rem 1rem", marginLeft: "0.5rem" }}
-        >
-          ✨ AI Slogan
         </button>
         <button
           onClick={startNewStartup}
@@ -204,7 +214,7 @@ export default function Home() {
 
       <div style={{ marginTop: "2rem" }}>
         <a
-          href={`https://twitter.com/intent/tweet?text=I built ${startupName} and earned $${revenue}! Slogan: ${slogan}`}
+          href={`https://twitter.com/intent/tweet?text=I built ${startupName} and earned $${revenue}! Slogan: "${slogan}" — Try it here: https://idle-inc.vercel.app`}
           target="_blank"
           rel="noopener noreferrer"
           style={{
